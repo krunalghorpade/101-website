@@ -1,0 +1,742 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+:root {
+    --bg-color: #fcfcfc;
+    --text-color: #888;
+    --border-color: #ebebeb;
+    --active-text: #111;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: radial-gradient(circle at 50% 50%, #ffffff 0%, #f4f4f4 50%, #e8e8e8 100%);
+    color: var(--text-color);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover, a.active {
+    color: var(--active-text);
+}
+
+.top-nav {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 10;
+}
+
+.site-info {
+    color: var(--active-text);
+    cursor: pointer;
+}
+
+.site-info h1 {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.site-info h1:hover {
+    opacity: 1;
+}
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.sticky-note {
+    position: relative;
+    max-width: 320px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 2px 8px 24px rgba(0, 0, 0, 0.08), 
+                inset 1px 1px 2px rgba(255, 255, 255, 0.9);
+    padding: 32px 24px 24px;
+    color: #222;
+    transform: rotate(-2deg);
+}
+
+.close-btn {
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #666;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    color: #000;
+}
+
+.sticky-note p {
+    font-size: 11.5px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    font-weight: 500;
+}
+
+.sticky-note p.signature {
+    margin-top: 16px;
+    margin-bottom: 0;
+    font-style: italic;
+    font-weight: 600;
+    text-align: right;
+    font-size: 12.5px;
+}
+
+.right-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    background: rgba(250, 250, 250, 0.7);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    overflow: hidden;
+    color: var(--text-color);
+    transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.icon-btn:hover {
+    color: var(--active-text);
+    border-color: var(--active-text);
+}
+
+.icon-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(100%);
+}
+
+.icon-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.bottom-nav {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    z-index: 10;
+}
+
+.bottom-left {
+    display: flex;
+    gap: 20px;
+    font-weight: 500;
+}
+
+.bottom-right-filters {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.filter-pill {
+    padding: 10px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 30px;
+    background: rgba(250, 250, 250, 0.7);
+    backdrop-filter: blur(10px);
+    color: var(--text-color);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.filter-pill sup {
+    font-size: 7px;
+    font-weight: 600;
+}
+
+.filter-pill:hover, .filter-pill.active {
+    color: var(--active-text);
+    border-color: var(--border-color);
+    background: rgba(230, 230, 230, 0.7);
+}
+
+.dropdown-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 25px;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23999" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    outline: none;
+}
+.dropdown-select:hover {
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23111" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+}
+
+/* Vinyl Stack Container */
+.vinyl-stack {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0px; /* tightly packed */
+    width: 100%;
+    height: 100vh;
+    padding: 0 50vw; /* allow scrolling edge records to center */
+    overflow-x: auto;
+    overflow-y: hidden;
+    perspective: 1200px; /* enables 3D space */
+    /* hide scrollbar */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.vinyl-stack::-webkit-scrollbar {
+    display: none;
+}
+
+.vinyl-slot {
+    width: 18px; /* Tighter stack width */
+    height: 245px; /* Match scaled height (350 * 0.7) */
+    position: relative;
+    transform-style: preserve-3d;
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.vinyl-cover {
+    position: absolute;
+    width: 350px;
+    height: 350px;
+    /* Scale down inactive cover, rotate further to thin the profile */
+    transform: rotateY(87deg) scale(0.7); 
+    transform-origin: center;
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    background: #111;
+    border-radius: 4px;
+    box-shadow: inset 1px 0 2px rgba(255,255,255,0.2), inset -1px 0 2px rgba(0,0,0,0.5), 5px 0 15px rgba(0,0,0,0.5);
+}
+
+/* Glossy sheen and cardboard crease overlay */
+.vinyl-cover::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 3;
+    pointer-events: none;
+    border-radius: 4px;
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0.0) 4%,
+        rgba(0, 0, 0, 0.1) 4.5%,
+        rgba(255, 255, 255, 0.0) 6%,
+        rgba(255, 255, 255, 0.05) 40%,
+        rgba(255, 255, 255, 0.0) 50%,
+        rgba(0, 0, 0, 0.15) 100%
+    );
+    box-shadow: inset 1px 1px 2px rgba(255,255,255,0.2), inset -1px -1px 3px rgba(0,0,0,0.4);
+}
+
+/* Thick 3D Spine */
+.spine {
+    position: absolute;
+    left: -1px; 
+    top: 0;
+    width: 43px; /* 3px thicker spine */
+    height: 100%;
+    /* Cardboard edge texture with lighting */
+    background: linear-gradient(to right, #444 0%, #222 20%, #888 50%, #222 80%, #111 100%);
+    transform: rotateY(-90deg);
+    transform-origin: left;
+    border-radius: 2px 0 0 2px;
+    z-index: 2;
+}
+
+.vinyl-slot:hover, .vinyl-slot.active, .vinyl-slot.playing {
+    width: 380px; 
+    height: 350px; /* Expand hitbox for active state */
+    z-index: 100; 
+}
+
+.vinyl-slot:hover .vinyl-cover, .vinyl-slot.active .vinyl-cover, .vinyl-slot.playing .vinyl-cover {
+    /* Full size and face camera */
+    transform: rotateY(0deg) scale(1.15);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+}
+
+/* Vinyl Record Elements */
+.vinyl-record-container {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 340px;
+    height: 340px;
+    z-index: 1; /* Behind the sleeve image */
+    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.vinyl-record {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: repeating-radial-gradient(
+      #111,
+      #111 2px,
+      #1a1a1a 3px,
+      #1a1a1a 4px
+    );
+    box-shadow: 0 0 10px rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+/* Vinyl Grooves Reflection */
+.vinyl-record::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+        transparent 0deg,
+        rgba(255,255,255,0.1) 45deg,
+        transparent 90deg,
+        transparent 180deg,
+        rgba(255,255,255,0.1) 225deg,
+        transparent 270deg,
+        transparent 360deg
+    );
+    pointer-events: none;
+}
+
+.record-label {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid #000;
+    position: relative;
+    z-index: 2;
+}
+
+.record-label::after {
+    /* The center hole */
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background: #fafafa;
+    border-radius: 50%;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+}
+
+/* Record sliding and spinning animations on play */
+.vinyl-slot.playing .vinyl-record-container {
+    transform: translateY(-160px); /* Slide out of the top */
+}
+
+.vinyl-slot.playing .vinyl-record {
+    animation: spinRecord 3s linear infinite;
+}
+
+@keyframes spinRecord {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Widget Container */
+#widget-container {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    z-index: 200;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    background: transparent;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .vinyl-slot, .vinyl-cover {
+        width: 300px;
+    }
+    .vinyl-cover {
+        height: 300px;
+    }
+    .vinyl-slot:hover {
+        height: 350px;
+    }
+    .top-nav {
+        flex-direction: column;
+        gap: 15px;
+    }
+    .bottom-nav {
+        flex-direction: column-reverse;
+        align-items: flex-start;
+        gap: 20px;
+    }
+    .bottom-right-filters {
+        align-items: flex-start;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+}
+/* Grid View Layout */
+.vinyl-stack.grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 60px 40px;
+    padding: 120px 60px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100vh;
+    align-items: start;
+    justify-items: center;
+    perspective: none;
+}
+
+.vinyl-stack.grid-view .vinyl-slot {
+    width: 250px;
+    height: 250px;
+}
+
+.vinyl-stack.grid-view .vinyl-cover {
+    width: 250px;
+    height: 250px;
+    transform: rotateY(0deg) scale(1) !important;
+    position: relative;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+}
+
+.vinyl-stack.grid-view .spine {
+    display: none;
+}
+
+.vinyl-stack.grid-view .vinyl-slot:hover .vinyl-cover,
+.vinyl-stack.grid-view .vinyl-slot.active .vinyl-cover,
+.vinyl-stack.grid-view .vinyl-slot.playing .vinyl-cover {
+    transform: scale(1.1) !important;
+    z-index: 100;
+}
+
+.vinyl-stack.grid-view .vinyl-record-container {
+    width: 240px;
+    height: 240px;
+}
+
+.vinyl-stack.grid-view .vinyl-slot.playing .vinyl-record-container {
+    transform: translateY(-80px);
+}
+
+/* Ensure images fit in grid view */
+.vinyl-stack.grid-view .vinyl-cover img {
+    width: 100%;
+    height: 100%;
+}
+
+/* List View */
+.vinyl-stack.list-view {
+    display: flex;
+    flex-direction: column;
+    padding: 120px 20vw;
+    gap: 30px;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    perspective: none;
+    align-items: center;
+}
+
+.vinyl-stack.list-view .vinyl-slot {
+    width: 100%;
+    max-width: 600px;
+    height: 120px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding-bottom: 20px;
+}
+
+.vinyl-stack.list-view .vinyl-cover {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    transform: none !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.vinyl-stack.list-view .spine,
+.vinyl-stack.list-view .vinyl-record-container {
+    display: none !important;
+}
+
+.list-view-title {
+    display: none;
+}
+
+.vinyl-stack.list-view .list-view-title {
+    display: block;
+    margin-left: 30px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--active-text);
+    text-transform: capitalize;
+    letter-spacing: 0.05em;
+    flex-grow: 1;
+}
+
+/* Scattered Room View */
+.vinyl-stack.scattered-view {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    perspective: 1500px;
+}
+
+.vinyl-stack.scattered-view .vinyl-slot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 250px;
+    height: 250px;
+    margin-left: -125px;
+    margin-top: -125px;
+    transform: translate(var(--random-x), var(--random-y)) rotateZ(var(--random-rot-z));
+    transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: grab;
+}
+
+.vinyl-stack.scattered-view .vinyl-slot:active {
+    cursor: grabbing;
+}
+
+.vinyl-stack.scattered-view .vinyl-cover {
+    width: 100%;
+    height: 100%;
+    /* Isometric floor effect */
+    transform: rotateX(50deg) rotateZ(15deg) scale(0.9) !important;
+    box-shadow: -15px 25px 30px rgba(0,0,0,0.3);
+}
+
+.vinyl-stack.scattered-view .spine {
+    display: none;
+}
+
+.vinyl-stack.scattered-view .vinyl-slot:hover {
+    z-index: 1000;
+}
+
+.vinyl-stack.scattered-view .vinyl-slot:hover .vinyl-cover,
+.vinyl-stack.scattered-view .vinyl-slot.active .vinyl-cover {
+    transform: rotateX(0deg) rotateZ(0deg) scale(1.2) !important;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+}
+
+.vinyl-stack.scattered-view .vinyl-record-container {
+    width: 240px;
+    height: 240px;
+    top: 5px;
+    left: 5px;
+}
+
+.vinyl-stack.scattered-view .vinyl-record {
+    width: 100%;
+    height: 100%;
+}
+
+.vinyl-stack.scattered-view .vinyl-slot.playing .vinyl-record-container {
+    transform: translateY(-100px);
+}
+
+/* CD Orbit View */
+.vinyl-stack.cd-orbit-view {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    perspective: 1200px;
+}
+
+.vinyl-stack.cd-orbit-view .vinyl-slot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 142px; /* CD Jewel Case */
+    height: 125px;
+    margin-left: -71px;
+    margin-top: -62px;
+    /* Combine item index angle with global scroll angle */
+    --angle: calc((360deg / var(--total-items)) * var(--index) + var(--global-orbit-angle, 0deg));
+    
+    /* Tilted ring layout with edges facing inwards (rotateY(-90deg) at the end) */
+    transform: rotateZ(20deg) rotateX(-20deg) rotateY(var(--angle)) translateZ(450px) rotateY(-90deg);
+    
+    transition: transform 0.15s ease-out; /* Smooth scroll tracking */
+    transform-style: preserve-3d;
+}
+
+/* Remove hover pause since it's scroll-driven now */
+.vinyl-stack.cd-orbit-view:hover .vinyl-slot {
+    /* No-op */
+}
+
+.vinyl-stack.cd-orbit-view .vinyl-cover {
+    width: 100%;
+    height: 100%;
+    transform: none !important;
+    border-radius: 3px;
+    /* Plastic jewel case edges */
+    border-right: 12px solid rgba(255,255,255,0.15);
+    border-left: 3px solid rgba(255,255,255,0.3);
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.6);
+}
+
+.vinyl-stack.cd-orbit-view .spine {
+    display: none;
+}
+
+.vinyl-stack.cd-orbit-view .vinyl-record-container {
+    width: 120px;
+    height: 120px;
+    top: 2px;
+    left: 10px;
+}
+
+/* Transform vinyl into 90s CD */
+.vinyl-stack.cd-orbit-view .vinyl-record {
+    /* Holographic, shiny metallic CD surface */
+    background: conic-gradient(
+        #cccccc 0deg,
+        #f9f9f9 45deg,
+        #f8bbd0 90deg,   /* subtle pink reflection */
+        #b2ebf2 135deg,  /* subtle cyan reflection */
+        #cccccc 180deg,
+        #f9f9f9 225deg,
+        #fff9c4 270deg,  /* subtle yellow reflection */
+        #d1c4e9 315deg,  /* subtle purple reflection */
+        #cccccc 360deg
+    ) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.9);
+    
+    /* Punch a real transparent hole in the center */
+    -webkit-mask-image: radial-gradient(circle, transparent 8px, black 9px);
+    mask-image: radial-gradient(circle, transparent 8px, black 9px);
+}
+
+.vinyl-stack.cd-orbit-view .record-label {
+    /* Turn the label area into the inner clear plastic ring of a CD */
+    width: 32%;
+    height: 32%;
+    top: 34%;
+    left: 34%;
+    background: rgba(255, 255, 255, 0.4) !important; /* override the inline artwork background */
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.2);
+    backdrop-filter: blur(2px);
+}
+
+.vinyl-stack.cd-orbit-view .record-label::after {
+    /* The raised plastic ridge around the center hole */
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 3px rgba(0,0,0,0.3);
+}
+
+.vinyl-stack.cd-orbit-view .vinyl-slot.playing .vinyl-record-container {
+    transform: translateX(80px); /* Slide CD out right */
+}

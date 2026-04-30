@@ -1,0 +1,172 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const audioBtn = document.querySelector('.audio-btn');
+    let isMuted = false;
+    
+    if (audioBtn) {
+        audioBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            if(isMuted) {
+                audioBtn.innerHTML = `
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                </svg>`;
+            } else {
+                audioBtn.innerHTML = `
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                </svg>`;
+            }
+        });
+    }
+
+    // Listen for click on vinyl artworks
+    function setupVinylSlot(slot) {
+        slot.addEventListener('click', () => {
+            document.querySelectorAll('.vinyl-slot').forEach(s => s.classList.remove('playing'));
+            slot.classList.add('playing');
+            
+            const container = document.getElementById('widget-container');
+            if (container && slot.dataset.widget) {
+                let widgetHTML = slot.dataset.widget;
+                if(widgetHTML.indexOf('autoplay=true') === -1) {
+                    widgetHTML = widgetHTML.replace('transparent=true/', 'transparent=true/autoplay=true/');
+                }
+                container.innerHTML = widgetHTML;
+                container.style.display = 'block';
+            }
+        });
+        
+        slot.addEventListener('mouseleave', () => {
+            slot.classList.remove('active');
+        });
+    }
+
+    document.querySelectorAll('.vinyl-slot').forEach(slot => {
+        setupVinylSlot(slot);
+    });
+
+    const stack = document.getElementById('stack');
+    if (stack) {
+        stack.addEventListener('scroll', () => {
+            const maxScrollLeft = stack.scrollWidth - stack.clientWidth;
+            if (stack.scrollLeft >= maxScrollLeft - 1000) {
+                const slots = Array.from(stack.querySelectorAll('.vinyl-slot'));
+                // clone 20 items from the beginning of the list
+                for(let i = 0; i < 20; i++) {
+                    // to keep variety, clone from a random or sequential part? 
+                    // let's just clone the first 20 items of the current nodes, 
+                    // or better, find the original 40 items pattern.
+                    // Wait, there are 40 items initially.
+                    const originalIndex = i % 40;
+                    const clone = slots[originalIndex].cloneNode(true);
+                    setupVinylSlot(clone);
+                    stack.appendChild(clone);
+                }
+            }
+            
+            if (stack.scrollLeft <= 1000 && stack.children.length > 0) {
+                // clone items and prepend
+                const slots = Array.from(stack.querySelectorAll('.vinyl-slot'));
+                let addedWidth = 0;
+                for(let i = 0; i < 20; i++) {
+                    const originalIndex = (40 - 1) - (i % 40);
+                    const clone = slots[originalIndex].cloneNode(true);
+                    setupVinylSlot(clone);
+                    stack.insertBefore(clone, stack.firstChild);
+                    // the width is usually 12px, but we can measure it
+                    // addedWidth += clone.offsetWidth; // normally 12px unless expanded
+                    // Actually, if we just add to the left, the scroll position shifts by the added width.
+                    // But prepending in flex can cause scroll jumps.
+                }
+                // stack.scrollLeft += addedWidth;
+            }
+        });
+    }
+    });
+
+    const randomBtn = document.querySelector('.random-btn');
+    if (randomBtn) {
+        randomBtn.addEventListener('click', () => {
+            const slots = document.querySelectorAll('.vinyl-slot');
+            if (slots.length > 0) {
+                // Remove active class from all
+                slots.forEach(s => s.classList.remove('active'));
+                
+                // Pick random
+                const randomIndex = Math.floor(Math.random() * slots.length);
+                const randomSlot = slots[randomIndex];
+                
+                randomSlot.classList.add('active');
+                randomSlot.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'center' });
+            }
+        });
+    }
+
+    // remove active class when mouse leaves so it acts like a sticky hover
+    function setupVinylSlot(slot) {
+        slot.addEventListener('click', () => {
+            document.querySelectorAll('.vinyl-slot').forEach(s => s.classList.remove('playing'));
+            slot.classList.add('playing');
+            
+            const container = document.getElementById('widget-container');
+            if (container && slot.dataset.widget) {
+                let widgetHTML = slot.dataset.widget;
+                if(widgetHTML.indexOf('autoplay=true') === -1) {
+                    widgetHTML = widgetHTML.replace('transparent=true/', 'transparent=true/autoplay=true/');
+                }
+                container.innerHTML = widgetHTML;
+                container.style.display = 'block';
+            }
+        });
+        
+        slot.addEventListener('mouseleave', () => {
+            slot.classList.remove('active');
+        });
+    }
+
+    document.querySelectorAll('.vinyl-slot').forEach(slot => {
+        setupVinylSlot(slot);
+    });
+
+    const stack = document.getElementById('stack');
+    if (stack) {
+        stack.addEventListener('scroll', () => {
+            const maxScrollLeft = stack.scrollWidth - stack.clientWidth;
+            if (stack.scrollLeft >= maxScrollLeft - 1000) {
+                const slots = Array.from(stack.querySelectorAll('.vinyl-slot'));
+                // clone 20 items from the beginning of the list
+                for(let i = 0; i < 20; i++) {
+                    // to keep variety, clone from a random or sequential part? 
+                    // let's just clone the first 20 items of the current nodes, 
+                    // or better, find the original 40 items pattern.
+                    // Wait, there are 40 items initially.
+                    const originalIndex = i % 40;
+                    const clone = slots[originalIndex].cloneNode(true);
+                    setupVinylSlot(clone);
+                    stack.appendChild(clone);
+                }
+            }
+            
+            if (stack.scrollLeft <= 1000 && stack.children.length > 0) {
+                // clone items and prepend
+                const slots = Array.from(stack.querySelectorAll('.vinyl-slot'));
+                let addedWidth = 0;
+                for(let i = 0; i < 20; i++) {
+                    const originalIndex = (40 - 1) - (i % 40);
+                    const clone = slots[originalIndex].cloneNode(true);
+                    setupVinylSlot(clone);
+                    stack.insertBefore(clone, stack.firstChild);
+                    // the width is usually 12px, but we can measure it
+                    // addedWidth += clone.offsetWidth; // normally 12px unless expanded
+                    // Actually, if we just add to the left, the scroll position shifts by the added width.
+                    // But prepending in flex can cause scroll jumps.
+                }
+                // stack.scrollLeft += addedWidth;
+            }
+        });
+    }
+    });
+});
