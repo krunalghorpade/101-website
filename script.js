@@ -22,23 +22,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function playTrack(slot) {
+        // Remove playing state from others
+        document.querySelectorAll('.vinyl-slot').forEach(s => s.classList.remove('playing'));
+        // Add playing state to clicked vinyl
+        slot.classList.add('playing');
+        
+        // Inject mini widget at the bottom
+        const container = document.getElementById('widget-container');
+        if (container && slot.dataset.widget) {
+            let widgetHTML = slot.dataset.widget;
+            if(widgetHTML.indexOf('autoplay=true') === -1) {
+                widgetHTML = widgetHTML.replace('transparent=true/', 'transparent=true/autoplay=true/');
+            }
+            container.innerHTML = widgetHTML;
+            container.style.display = 'block';
+        }
+    }
+
     function setupVinylSlot(slot) {
         slot.addEventListener('click', () => {
-            // Remove playing state from others
-            document.querySelectorAll('.vinyl-slot').forEach(s => s.classList.remove('playing'));
-            // Add playing state to clicked vinyl
-            slot.classList.add('playing');
-            
-            // Inject mini widget at the bottom
-            const container = document.getElementById('widget-container');
-            if (container && slot.dataset.widget) {
-                let widgetHTML = slot.dataset.widget;
-                if(widgetHTML.indexOf('autoplay=true') === -1) {
-                    widgetHTML = widgetHTML.replace('transparent=true/', 'transparent=true/autoplay=true/');
-                }
-                container.innerHTML = widgetHTML;
-                container.style.display = 'block';
-            }
+            playTrack(slot);
         });
         
         slot.addEventListener('mouseleave', () => {
@@ -115,63 +119,192 @@ document.addEventListener('DOMContentLoaded', () => {
         let dragStartTime;
         let hasMoved = false;
 
-        slot.addEventListener('mousedown', (e) => {
+        const startDrag = (e) => {
             if (!stack.classList.contains('scattered-view')) return;
-            if (e.button !== 0) return; // Only left click
-            
-            e.preventDefault(); // Prevent native image dragging
+            if (e.type === 'mousedown' && e.button !== 0) return; // Only left click
 
             isDragging = true;
             hasMoved = false;
-            dragStartTime = Date.now();
             
+            const startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
+            if (e.type === 'mousedown') e.preventDefault(); // Prevent native image dragging
+
             slot.style.transition = 'none';
             slot.style.zIndex = '1000';
             
-            const onMouseMove = (moveEvent) => {
+            const onMove = (moveEvent) => {
                 if (!isDragging) return;
                 hasMoved = true;
                 
-                // Calculate position relative to center of screen (matching CSS top:50% left:50%)
-                const newX = (moveEvent.clientX - window.innerWidth / 2) + 'px';
-                const newY = (moveEvent.clientY - window.innerHeight / 2) + 'px';
+                const currentX = moveEvent.type.includes('touch') ? moveEvent.touches[0].clientX : moveEvent.clientX;
+                const currentY = moveEvent.type.includes('touch') ? moveEvent.touches[0].clientY : moveEvent.clientY;
+
+                // Calculate position relative to center of screen
+                const newX = (currentX - window.innerWidth / 2) + 'px';
+                const newY = (currentY - window.innerHeight / 2) + 'px';
                 
                 slot.style.setProperty('--random-x', newX);
                 slot.style.setProperty('--random-y', newY);
             };
 
-            const onMouseUp = () => {
+            const endDrag = () => {
                 isDragging = false;
                 slot.style.transition = '';
                 slot.style.zIndex = '';
                 
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', endDrag);
+                document.removeEventListener('touchmove', onMove);
+                document.removeEventListener('touchend', endDrag);
                 
-                // If the user moved the record significantly, prevent the click event from triggering play
                 if (hasMoved) {
                     slot.style.pointerEvents = 'none';
                     setTimeout(() => slot.style.pointerEvents = '', 50);
                 }
             };
 
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-        });
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchmove', onMove, { passive: false });
+            document.addEventListener('touchend', endDrag);
+        };
+
+        slot.addEventListener('mousedown', startDrag);
+        slot.addEventListener('touchstart', startDrag, { passive: false });
     });
 
-    // --- Scroll Rotation Logic for CD Orbit View ---
+    // --- Scroll/Touch Rotation Logic for CD Orbit View ---
     let currentOrbitAngle = 0;
+    let lastTouchX = 0;
+
+    const handleOrbitScroll = (delta) => {
+        currentOrbitAngle += delta * -0.2;
+        stack.style.setProperty('--global-orbit-angle', currentOrbitAngle + 'deg');
+    };
+
     stack.addEventListener('wheel', (e) => {
         if (!stack.classList.contains('cd-orbit-view')) return;
+        e.preventDefault();
+        handleOrbitScroll(e.deltaY + e.deltaX);
+    }, { passive: false });
+
+    stack.addEventListener('touchstart', (e) => {
+        if (!stack.classList.contains('cd-orbit-view')) return;
+        lastTouchX = e.touches[0].clientX;
+    }, { passive: true });
+
+    stack.addEventListener('touchmove', (e) => {
+        if (!stack.classList.contains('cd-orbit-view')) return;
+        const currentX = e.touches[0].clientX;
+        const deltaX = currentX - lastTouchX;
+        lastTouchX = currentX;
+        handleOrbitScroll(-deltaX * 5); // Multiplier for touch sensitivity
+    }, { passive: true });
+
+    // --- iPod View Logic ---
+    const ipodTrackList = document.querySelector('.ipod-track-list');
+    const ipodPlayer = document.querySelector('.ipod-player');
+
+    function updateIpodList() {
+        if (!ipodTrackList) return;
+        ipodTrackList.innerHTML = '';
+        slots.forEach((slot, index) => {
+            const trackName = slot.querySelector('.list-view-title')?.textContent || `Track ${index + 1}`;
+            const li = document.createElement('li');
+            li.textContent = trackName;
+            li.dataset.index = index;
+            if (slot.classList.contains('playing')) li.classList.add('selected');
+            
+            li.addEventListener('click', () => {
+                selectIpodTrack(index);
+            });
+            ipodTrackList.appendChild(li);
+        });
+    }
+
+    function selectIpodTrack(index) {
+        document.querySelectorAll('.ipod-track-list li').forEach(li => li.classList.remove('selected'));
+        const selectedLi = ipodTrackList.querySelector(`li[data-index="${index}"]`);
+        if (selectedLi) selectedLi.classList.add('selected');
         
-        e.preventDefault(); // Prevent page scrolling
+        playTrack(slots[index]); // Use new direct function instead of .click()
+        showIpodPlayer(index);
+    }
+
+    function showIpodPlayer(index) {
+        const slot = slots[index];
+        const art = slot.querySelector('img').src;
+        const title = slot.querySelector('.list-view-title')?.textContent || "Unknown Track";
         
-        // Adjust angle based on scroll wheel delta
-        currentOrbitAngle += (e.deltaY + e.deltaX) * -0.2; 
+        const miniArt = document.querySelector('.ipod-mini-art');
+        const trackTitle = document.querySelector('.ipod-track-title');
         
-        // Update a CSS variable on the stack that all slots can use
-        stack.style.setProperty('--global-orbit-angle', currentOrbitAngle + 'deg');
+        if (miniArt) miniArt.style.backgroundImage = `url(${art})`;
+        if (trackTitle) trackTitle.textContent = title;
+        
+        if (ipodTrackList) ipodTrackList.style.display = 'none';
+        if (ipodPlayer) ipodPlayer.style.display = 'flex';
+    }
+
+    // iPod Buttons
+    document.querySelector('.menu-btn')?.addEventListener('click', () => {
+        if (ipodTrackList) ipodTrackList.style.display = 'block';
+        if (ipodPlayer) ipodPlayer.style.display = 'none';
+    });
+
+    document.querySelector('.wheel-center')?.addEventListener('click', () => {
+        let selected = ipodTrackList?.querySelector('li.selected');
+        if (!selected && ipodTrackList) {
+            selected = ipodTrackList.querySelector('li');
+        }
+        if (selected && (ipodTrackList.style.display !== 'none' || !document.querySelector('.vinyl-slot.playing'))) {
+            selectIpodTrack(selected.dataset.index);
+        }
+    });
+
+    document.querySelector('.prev-btn')?.addEventListener('click', () => {
+        const currentIndex = Array.from(slots).findIndex(s => s.classList.contains('playing'));
+        const prevIndex = currentIndex === -1 ? 0 : (currentIndex - 1 + slots.length) % slots.length;
+        selectIpodTrack(prevIndex);
+    });
+
+    document.querySelector('.next-btn')?.addEventListener('click', () => {
+        const currentIndex = Array.from(slots).findIndex(s => s.classList.contains('playing'));
+        const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % slots.length;
+        selectIpodTrack(nextIndex);
+    });
+
+    document.querySelector('.play-btn')?.addEventListener('click', () => {
+        let selected = ipodTrackList?.querySelector('li.selected');
+        if (!selected && ipodTrackList) {
+            selected = ipodTrackList.querySelector('li');
+        }
+        if (selected) selectIpodTrack(selected.dataset.index);
+    });
+
+    // Click Wheel Scroll Simulation
+    document.querySelector('.ipod-click-wheel')?.addEventListener('wheel', (e) => {
+        if (!stack.classList.contains('ipod-view')) return;
+        if (!ipodTrackList || ipodTrackList.style.display === 'none') return;
+        
+        e.preventDefault();
+        const items = ipodTrackList.querySelectorAll('li');
+        if (items.length === 0) return;
+
+        let selectedIndex = Array.from(items).findIndex(li => li.classList.contains('selected'));
+        if (selectedIndex === -1) selectedIndex = 0;
+        
+        if (e.deltaY > 0) {
+            selectedIndex = (selectedIndex + 1) % items.length;
+        } else {
+            selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+        }
+
+        items.forEach(li => li.classList.remove('selected'));
+        items[selectedIndex].classList.add('selected');
+        items[selectedIndex].scrollIntoView({ block: 'nearest' });
     }, { passive: false });
 
     // View Switcher Logic
@@ -181,10 +314,21 @@ document.addEventListener('DOMContentLoaded', () => {
         viewSwitcher.addEventListener('change', (e) => {
             const view = e.target.value;
             // Clear all view classes
-            stack.classList.remove('grid-view', 'list-view', 'scattered-view', 'cd-orbit-view', 'isometric-view');
+            stack.classList.remove('grid-view', 'list-view', 'scattered-view', 'cd-orbit-view', 'isometric-view', 'ipod-view');
             
             if (view !== 'horizontal') {
                 stack.classList.add(view + '-view');
+            }
+
+            if (view === 'ipod') {
+                updateIpodList();
+                const playingIndex = Array.from(slots).findIndex(s => s.classList.contains('playing'));
+                if (playingIndex !== -1) {
+                    showIpodPlayer(playingIndex);
+                } else {
+                    if (ipodTrackList) ipodTrackList.style.display = 'block';
+                    if (ipodPlayer) ipodPlayer.style.display = 'none';
+                }
             }
         });
     }

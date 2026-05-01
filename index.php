@@ -31,13 +31,10 @@
                 <option value="list">List View</option>
                 <option value="scattered">Scattered Room View</option>
                 <option value="cd-orbit">CD Orbit</option>
+                <option value="ipod">iPod View</option>
             </select>
         </div>
 
-    </div>
-
-    <div id="widget-container" style="display: none;">
-        <!-- Mini widget injected here -->
     </div>
 
     <div class="vinyl-stack" id="stack">
@@ -98,6 +95,50 @@
             echo '</div>';
         }
         ?>
+    </div>
+
+    <!-- iPod View Container -->
+    <div id="ipod-wrapper" class="ipod-wrapper">
+        <div class="ipod-device">
+            <div class="ipod-screen-container">
+                <div class="ipod-screen">
+                    <div class="ipod-status-bar">
+                        <span>iPod</span>
+                        <span class="battery">🔋</span>
+                    </div>
+                    <div class="ipod-content">
+                        <ul class="ipod-track-list">
+                            <!-- Populated via JS -->
+                        </ul>
+                        <div class="ipod-player" style="display:none;">
+                            <div class="ipod-mini-art"></div>
+                            <div class="ipod-info-block">
+                                <div class="ipod-track-title">Now Playing</div>
+                                <div class="ipod-artist-name">Kratex</div>
+                                <div class="ipod-progress-container">
+                                    <div class="ipod-progress-bar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ipod-wheel-area">
+                <div class="ipod-click-wheel">
+                    <button class="wheel-btn menu-btn">MENU</button>
+                    <button class="wheel-btn prev-btn">
+                        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M6 18V6h2v12H6zm3.5-6L18 18V6l-8.5 6z"/></svg>
+                    </button>
+                    <button class="wheel-btn next-btn">
+                        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                    </button>
+                    <button class="wheel-btn play-btn">
+                        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+                    </button>
+                    <div class="wheel-center"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
