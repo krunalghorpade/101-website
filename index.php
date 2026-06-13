@@ -39,60 +39,98 @@
 
     <div class="vinyl-stack" id="stack">
         <?php
-        $widgetsMap = [
-            1 => '<iframe style="border: 0; width: 100%; height: 42px;" src="https://bandcamp.com/EmbeddedPlayer/album=1759628833/size=small/bgcol=ffffff/linkcol=0687f5/track=1626526712/transparent=true/" seamless><a href="https://kratex.bandcamp.com/album/101-epic-days-of-house-music-free-for-limited-time">101 Epic Days of House Music [FREE for Limited Time] by Kratex</a></iframe>',
-            2 => '<iframe style="border: 0; width: 100%; height: 42px;" src="https://bandcamp.com/EmbeddedPlayer/album=1759628833/size=small/bgcol=ffffff/linkcol=0687f5/track=280295140/transparent=true/" seamless><a href="https://kratex.bandcamp.com/album/101-epic-days-of-house-music-free-for-limited-time">101 Epic Days of House Music [FREE for Limited Time] by Kratex</a></iframe>',
-            3 => '<iframe style="border: 0; width: 100%; height: 42px;" src="https://bandcamp.com/EmbeddedPlayer/album=1759628833/size=small/bgcol=ffffff/linkcol=0687f5/track=363670738/transparent=true/" seamless><a href="https://kratex.bandcamp.com/album/101-epic-days-of-house-music-free-for-limited-time">101 Epic Days of House Music [FREE for Limited Time] by Kratex</a></iframe>',
-            4 => '<iframe style="border: 0; width: 100%; height: 42px;" src="https://bandcamp.com/EmbeddedPlayer/album=1759628833/size=small/bgcol=ffffff/linkcol=0687f5/track=2926132175/transparent=true/" seamless><a href="https://kratex.bandcamp.com/album/101-epic-days-of-house-music-free-for-limited-time">101 Epic Days of House Music [FREE for Limited Time] by Kratex</a></iframe>',
-            5 => '<iframe style="border: 0; width: 100%; height: 42px;" src="https://bandcamp.com/EmbeddedPlayer/album=1759628833/size=small/bgcol=ffffff/linkcol=0687f5/track=371438780/transparent=true/" seamless><a href="https://kratex.bandcamp.com/album/101-epic-days-of-house-music-free-for-limited-time">101 Epic Days of House Music [FREE for Limited Time] by Kratex</a></iframe>',
-            6 => '<iframe style="border: 0; width: 100%; height: 42px;" src="https://bandcamp.com/EmbeddedPlayer/album=1759628833/size=small/bgcol=ffffff/linkcol=0687f5/track=4093062497/transparent=true/" seamless><a href="https://kratex.bandcamp.com/album/101-epic-days-of-house-music-free-for-limited-time">101 Epic Days of House Music [FREE for Limited Time] by Kratex</a></iframe>',
-            7 => '<iframe style="border: 0; width: 100%; height: 42px;" src="https://bandcamp.com/EmbeddedPlayer/album=1759628833/size=small/bgcol=ffffff/linkcol=0687f5/track=4237285479/transparent=true/" seamless><a href="https://kratex.bandcamp.com/album/101-epic-days-of-house-music-free-for-limited-time">101 Epic Days of House Music [FREE for Limited Time] by Kratex</a></iframe>',
-            8 => '<iframe style="border: 0; width: 100%; height: 42px;" src="https://bandcamp.com/EmbeddedPlayer/album=1759628833/size=small/bgcol=ffffff/linkcol=0687f5/track=3735655464/transparent=true/" seamless><a href="https://kratex.bandcamp.com/album/101-epic-days-of-house-music-free-for-limited-time">101 Epic Days of House Music [FREE for Limited Time] by Kratex</a></iframe>'
-        ];
+        $cacheFile = 'tracks_cache.json';
+        $cacheTime = 3600; // 1 hour cache
 
-        // Dynamically load all images from the folder
-        $artworks = glob('images/artworks/*.{jpg,jpeg,png,gif}', GLOB_BRACE);
-        
-        // Fallback just in case folder is empty
-        if(empty($artworks)) {
-            $artworks = ['images/album_cover_1.png'];
+        if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTime) {
+            $bandcampData = json_decode(file_get_contents($cacheFile), true);
+        } else {
+            $url = "https://kratex.bandcamp.com/album/101-epic-days-of-house-music-free-for-limited-time";
+            $options = [
+                "http" => [
+                    "header" => "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)\r\n"
+                ]
+            ];
+            $context = stream_context_create($options);
+            $html = @file_get_contents($url, false, $context);
+            $bandcampData = null;
+            if ($html && preg_match('/data-tralbum="([^"]+)"/', $html, $matches)) {
+                $dataStr = html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8');
+                $bandcampData = json_decode($dataStr, true);
+                file_put_contents($cacheFile, json_encode($bandcampData));
+            } elseif (file_exists($cacheFile)) {
+                $bandcampData = json_decode(file_get_contents($cacheFile), true);
+            }
         }
 
-        // Generate exactly the items available without repeating
-        foreach ($artworks as $art) {
+        if ($bandcampData && isset($bandcampData['trackinfo'])) {
+            $albumId = $bandcampData['id'];
+            $albumArtUrl = "https://f4.bcbits.com/img/a" . $bandcampData['art_id'] . "_10.jpg";
             
-            // Extract track number from filename (e.g. '008 - in my head.png' -> 8)
-            $filename = basename($art);
-            preg_match('/^(\d+)/', $filename, $matches);
-            $trackNum = isset($matches[1]) ? (int)$matches[1] : 1;
+            $trackArtsFile = 'track_arts.json';
+            $trackArts = file_exists($trackArtsFile) ? json_decode(file_get_contents($trackArtsFile), true) : [];
+            $trackArtsUpdated = false;
             
-            // Fetch correct widget or fallback to track 1
-            $widget = isset($widgetsMap[$trackNum]) ? $widgetsMap[$trackNum] : $widgetsMap[1];
+            foreach ($bandcampData['trackinfo'] as $index => $t) {
+                $trackNum = $t['track_num'];
+                $trackTitle = $t['title'];
+                $trackId = $t['track_id'];
+                
+                // Construct widget
+                $widget = '<iframe style="border: 0; width: 100%; height: 42px;" src="https://bandcamp.com/EmbeddedPlayer/album=' . $albumId . '/size=small/bgcol=ffffff/linkcol=0687f5/track=' . $trackId . '/transparent=true/" seamless><a href="https://kratex.bandcamp.com/album/101-epic-days-of-house-music-free-for-limited-time">101 Epic Days of House Music [FREE for Limited Time] by Kratex</a></iframe>';
+                
+                // Fetch individual track artwork if not in cache
+                if (!isset($trackArts[$trackId])) {
+                    $trackUrl = "https://kratex.bandcamp.com" . $t['title_link'];
+                    $trackHtml = @file_get_contents($trackUrl, false, $context);
+                    if ($trackHtml && preg_match('/data-tralbum="([^"]+)"/', $trackHtml, $trackMatches)) {
+                        $trackDataStr = html_entity_decode($trackMatches[1], ENT_QUOTES, 'UTF-8');
+                        $trackData = json_decode($trackDataStr, true);
+                        if (isset($trackData['art_id'])) {
+                            $trackArts[$trackId] = "https://f4.bcbits.com/img/a" . $trackData['art_id'] . "_10.jpg";
+                        } else {
+                            $trackArts[$trackId] = $albumArtUrl;
+                        }
+                        $trackArtsUpdated = true;
+                    } else {
+                        $trackArts[$trackId] = $albumArtUrl;
+                    }
+                }
+                
+                $art = isset($trackArts[$trackId]) ? $trackArts[$trackId] : $albumArtUrl;
+                
+                // Find custom local artwork if exists (e.g. 001 - my gang.png)
+                $paddedNum = sprintf('%03d', $trackNum);
+                $localArts = glob("images/artworks/{$paddedNum}*.{jpg,jpeg,png,gif}", GLOB_BRACE);
+                if (!empty($localArts)) {
+                    $art = $localArts[0];
+                }
+                
+                echo '<div class="vinyl-slot" data-widget="'.htmlspecialchars($widget).'">';
+                echo '  <div class="vinyl-cover">';
+                echo '    <div class="spine"></div>';
+                
+                // The Vinyl Record inside the sleeve
+                echo '    <div class="vinyl-record-container">';
+                echo '      <div class="vinyl-record">';
+                echo '         <div class="record-label" style="background-image: url(\''.htmlspecialchars($art).'\');"></div>';
+                echo '      </div>';
+                echo '    </div>';
 
-            // Extract track name properly for List View
-            $nameWithoutExt = pathinfo($filename, PATHINFO_FILENAME);
-            $cleanName = preg_replace('/^[\d\s\-]+/', '', $nameWithoutExt);
-            $trackTitle = ucwords(str_replace(['-', '_'], ' ', $cleanName));
-            if (empty($trackTitle)) $trackTitle = "Track " . $trackNum;
-
-            echo '<div class="vinyl-slot" data-widget="'.htmlspecialchars($widget).'">';
-            echo '  <div class="vinyl-cover">';
-            echo '    <div class="spine"></div>';
+                echo '    <img src="'.htmlspecialchars($art).'" alt="Artwork" draggable="false" style="position: relative; z-index: 2; width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">';
+                echo '  </div>';
+                
+                // Title for list view
+                echo '  <div class="list-view-title">' . htmlspecialchars($trackTitle) . '</div>';
+                
+                echo '</div>';
+            }
             
-            // The Vinyl Record inside the sleeve
-            echo '    <div class="vinyl-record-container">';
-            echo '      <div class="vinyl-record">';
-            echo '         <div class="record-label" style="background-image: url(\''.htmlspecialchars($art).'\');"></div>';
-            echo '      </div>';
-            echo '    </div>';
-
-            echo '    <img src="'.htmlspecialchars($art).'" alt="Artwork" draggable="false" style="position: relative; z-index: 2; width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">';
-            echo '  </div>';
-            
-            // Title for list view
-            echo '  <div class="list-view-title">' . htmlspecialchars($trackTitle) . '</div>';
-            
-            echo '</div>';
+            if ($trackArtsUpdated) {
+                file_put_contents($trackArtsFile, json_encode($trackArts));
+            }
+        } else {
+            echo "<p>Could not load tracks.</p>";
         }
         ?>
     </div>
@@ -139,6 +177,10 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="widget-container" style="display: none;">
+        <!-- Mini widget injected here -->
     </div>
 
     <script src="script.js"></script>

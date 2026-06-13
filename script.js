@@ -229,12 +229,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedLi = ipodTrackList.querySelector(`li[data-index="${index}"]`);
         if (selectedLi) selectedLi.classList.add('selected');
         
-        playTrack(slots[index]); // Use new direct function instead of .click()
+        // Update iPod screen but DON'T play yet unless it's a direct play action
         showIpodPlayer(index);
     }
 
     function showIpodPlayer(index) {
         const slot = slots[index];
+        if (!slot) return;
         const art = slot.querySelector('img').src;
         const title = slot.querySelector('.list-view-title')?.textContent || "Unknown Track";
         
@@ -259,8 +260,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!selected && ipodTrackList) {
             selected = ipodTrackList.querySelector('li');
         }
-        if (selected && (ipodTrackList.style.display !== 'none' || !document.querySelector('.vinyl-slot.playing'))) {
-            selectIpodTrack(selected.dataset.index);
+        if (selected) {
+            const idx = selected.dataset.index;
+            selectIpodTrack(idx);
+            playTrack(slots[idx]); // Play on center button click
         }
     });
 
@@ -268,12 +271,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentIndex = Array.from(slots).findIndex(s => s.classList.contains('playing'));
         const prevIndex = currentIndex === -1 ? 0 : (currentIndex - 1 + slots.length) % slots.length;
         selectIpodTrack(prevIndex);
+        if (document.querySelector('.vinyl-slot.playing')) playTrack(slots[prevIndex]);
     });
 
     document.querySelector('.next-btn')?.addEventListener('click', () => {
         const currentIndex = Array.from(slots).findIndex(s => s.classList.contains('playing'));
         const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % slots.length;
         selectIpodTrack(nextIndex);
+        if (document.querySelector('.vinyl-slot.playing')) playTrack(slots[nextIndex]);
     });
 
     document.querySelector('.play-btn')?.addEventListener('click', () => {
@@ -281,7 +286,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!selected && ipodTrackList) {
             selected = ipodTrackList.querySelector('li');
         }
-        if (selected) selectIpodTrack(selected.dataset.index);
+        if (selected) {
+            const idx = selected.dataset.index;
+            playTrack(slots[idx]); // Only play button opens the widget
+            showIpodPlayer(idx);
+        }
     });
 
     // Click Wheel Scroll Simulation
