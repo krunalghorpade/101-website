@@ -1,11 +1,42 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
+
 :root {
     --bg-color: #fcfcfc;
     --text-color: #888;
     --border-color: #ebebeb;
     --active-text: #111;
+    --bg-gradient: radial-gradient(circle at 50% 50%, #ffffff 0%, #f4f4f4 50%, #e8e8e8 100%);
+    --modal-bg: rgba(255, 255, 255, 0.85);
+    --pill-bg: rgba(250, 250, 250, 0.7);
+    --pill-hover-bg: rgba(230, 230, 230, 0.7);
+    --ipod-bg-gradient: radial-gradient(circle at center, #ffffff 0%, #e8e8e8 100%);
+    --ipod-edge-gradient: linear-gradient(135deg, #ffffff 0%, #a0a0a0 50%, #ffffff 100%);
+    --ipod-wheel-bg: #ffffff;
+    --ipod-center-bg: #ffffff;
+    --ipod-center-active: #fafafa;
+    --dropdown-arrow: url('data:image/svg+xml;utf8,<svg fill="%23999" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    --dropdown-arrow-hover: url('data:image/svg+xml;utf8,<svg fill="%23111" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
 }
+
+body.dark-mode {
+    --bg-color: #111;
+    --text-color: #888;
+    --border-color: #333;
+    --active-text: #eee;
+    --bg-gradient: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #111111 50%, #050505 100%);
+    --modal-bg: rgba(20, 20, 20, 0.85);
+    --pill-bg: rgba(30, 30, 30, 0.7);
+    --pill-hover-bg: rgba(50, 50, 50, 0.7);
+    --ipod-bg-gradient: radial-gradient(circle at center, #2a2a2a 0%, #1a1a1a 100%);
+    --ipod-edge-gradient: linear-gradient(135deg, #333 0%, #111 50%, #333 100%);
+    --ipod-wheel-bg: #222;
+    --ipod-center-bg: #1a1a1a;
+    --ipod-center-active: #111;
+    --dropdown-arrow: url('data:image/svg+xml;utf8,<svg fill="%23888" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    --dropdown-arrow-hover: url('data:image/svg+xml;utf8,<svg fill="%23eee" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+}
+
 
 * {
     margin: 0;
@@ -15,7 +46,7 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    background: radial-gradient(circle at 50% 50%, #ffffff 0%, #f4f4f4 50%, #e8e8e8 100%);
+    background: var(--bg-gradient);
     color: var(--text-color);
     height: 100vh;
     overflow: hidden;
@@ -92,7 +123,7 @@ a:hover, a.active {
 .sticky-note {
     position: relative;
     max-width: 320px;
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--modal-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-radius: 2px;
@@ -149,7 +180,7 @@ a:hover, a.active {
     height: 40px;
     border-radius: 5px;
     border: 1px solid var(--border-color);
-    background: rgba(250, 250, 250, 0.7);
+    background: var(--pill-bg);
     backdrop-filter: blur(10px);
     display: flex;
     justify-content: center;
@@ -210,7 +241,7 @@ a:hover, a.active {
     padding: 10px 16px;
     border: 1px solid var(--border-color);
     border-radius: 30px;
-    background: rgba(250, 250, 250, 0.7);
+    background: var(--pill-bg);
     backdrop-filter: blur(10px);
     color: var(--text-color);
     cursor: pointer;
@@ -233,7 +264,7 @@ a:hover, a.active {
 .filter-pill:hover, .filter-pill.active {
     color: var(--active-text);
     border-color: var(--border-color);
-    background: rgba(230, 230, 230, 0.7);
+    background: var(--pill-hover-bg);
 }
 
 .dropdown-select {
@@ -275,6 +306,7 @@ a:hover, a.active {
     height: 245px; /* Match scaled height (350 * 0.7) */
     position: relative;
     transform-style: preserve-3d;
+    will-change: transform, width, height;
     transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
     cursor: pointer;
     flex-shrink: 0;
@@ -290,8 +322,9 @@ a:hover, a.active {
     /* Scale down inactive cover, rotate further to thin the profile */
     transform: rotateY(87deg) scale(0.7); 
     transform-origin: center;
+    will-change: transform;
     transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-    background: #111;
+    background: #111 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="none" stroke="%23333" stroke-width="4"/><circle cx="25" cy="25" r="20" fill="none" stroke="%23888" stroke-width="4" stroke-dasharray="31.4 100" transform="rotate(0 25 25)"><animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite"/></circle></svg>') center no-repeat;
     border-radius: 4px;
     box-shadow: inset 1px 0 2px rgba(255,255,255,0.2), inset -1px 0 2px rgba(0,0,0,0.5), 5px 0 15px rgba(0,0,0,0.5);
 }
@@ -352,7 +385,17 @@ a:hover, a.active {
     width: 340px;
     height: 340px;
     z-index: 1; /* Behind the sleeve image */
-    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+    opacity: 0;
+    visibility: hidden;
+    will-change: transform, opacity;
+    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s, visibility 0.3s;
+}
+
+.vinyl-slot:hover .vinyl-record-container, 
+.vinyl-slot.active .vinyl-record-container, 
+.vinyl-slot.playing .vinyl-record-container {
+    opacity: 1;
+    visibility: visible;
 }
 
 .vinyl-record {
@@ -410,7 +453,7 @@ a:hover, a.active {
     transform: translate(-50%, -50%);
     width: 10px;
     height: 10px;
-    background: #fafafa;
+    background: var(--ipod-center-active);
     border-radius: 50%;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
 }
@@ -441,6 +484,38 @@ a:hover, a.active {
     overflow: hidden;
     box-shadow: 0 15px 35px rgba(0,0,0,0.3);
     background: transparent;
+    display: flex;
+    flex-direction: column;
+}
+
+.player-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 8px;
+    background: var(--pill-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.player-controls .icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.player-controls .icon-btn:hover {
+    color: var(--active-text);
+    background: var(--pill-hover-bg);
 }
 
 /* Responsive adjustments */
@@ -854,7 +929,7 @@ a:hover, a.active {
     z-index: 1000;
     justify-content: center;
     align-items: center;
-    background: radial-gradient(circle at center, #ffffff 0%, #e8e8e8 100%);
+    background: var(--ipod-bg-gradient);
 }
 
 .vinyl-stack.ipod-view ~ .ipod-wrapper {
@@ -888,7 +963,7 @@ a:hover, a.active {
     position: absolute;
     top: -3px; left: -3px; right: -3px; bottom: -3px;
     border-radius: 38px;
-    background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 50%, #ffffff 100%);
+    background: var(--ipod-edge-gradient);
     z-index: -1;
 }
 
@@ -1021,7 +1096,7 @@ a:hover, a.active {
 .ipod-click-wheel {
     width: 230px;
     height: 230px;
-    background: #ffffff;
+    background: var(--ipod-wheel-bg);
     border-radius: 50%;
     position: relative;
     border: 1px solid #e0e0e0;
@@ -1066,9 +1141,10 @@ a:hover, a.active {
 .play-btn { bottom: 2px; left: 50%; transform: translateX(-50%); }
 
 .wheel-center {
+    background: var(--ipod-center-bg);
     width: 95px;
     height: 95px;
-    background: #ffffff;
+    background: var(--ipod-wheel-bg);
     border-radius: 50%;
     position: absolute;
     top: 50%;
@@ -1082,12 +1158,12 @@ a:hover, a.active {
     z-index: 10;
 }
 
-.wheel-center:active { background: #fafafa; }
+.wheel-center:active { background: var(--ipod-center-active); }
 
 /* Mobile full screen ipod */
 @media (max-width: 768px) {
     .ipod-wrapper {
-        background: #ffffff;
+        background: var(--ipod-wheel-bg);
         padding: 0;
     }
     .ipod-device {
@@ -1102,4 +1178,38 @@ a:hover, a.active {
     .ipod-screen-container { height: 45vh; margin-bottom: 30px; }
     .ipod-screen { height: 100%; }
     .ipod-click-wheel { width: 280px; height: 280px; }
+}
+
+/* Page Loader */
+#page-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg-color);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+#page-loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loader-text {
+    font-size: 24px;
+    font-weight: 600;
+    color: #111;
+    letter-spacing: 0.2em;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.4; transform: scale(0.98); }
+    50% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0.4; transform: scale(0.98); }
 }

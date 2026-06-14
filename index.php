@@ -8,6 +8,12 @@
 </head>
 <body>
 
+    <div id="page-loader">
+        <div class="loader-content">
+            <span class="loader-text">101</span>
+        </div>
+    </div>
+
     <nav class="top-nav">
         <div class="site-info" id="title-btn">
             <h1>101 Epic Days of House - by Kratex</h1>
@@ -33,6 +39,7 @@
                 <option value="cd-orbit">CD Orbit</option>
                 <option value="ipod">iPod View</option>
             </select>
+            <button id="dark-mode-toggle" class="filter-pill">🌙 Dark Mode</button>
         </div>
 
     </div>
@@ -77,7 +84,7 @@
                 $trackId = $t['track_id'];
                 
                 // Construct widget
-                $widget = '<iframe style="border: 0; width: 100%; height: 42px;" src="https://bandcamp.com/EmbeddedPlayer/album=' . $albumId . '/size=small/bgcol=ffffff/linkcol=0687f5/track=' . $trackId . '/transparent=true/" seamless><a href="https://kratex.bandcamp.com/album/101-epic-days-of-house-music-free-for-limited-time">101 Epic Days of House Music [FREE for Limited Time] by Kratex</a></iframe>';
+                $widget = '<iframe allow="autoplay" style="border: 0; width: 100%; height: 42px;" src="https://bandcamp.com/EmbeddedPlayer/album=' . $albumId . '/size=small/bgcol=ffffff/linkcol=0687f5/track=' . $trackId . '/transparent=true/" seamless><a href="https://kratex.bandcamp.com/album/101-epic-days-of-house-music-free-for-limited-time">101 Epic Days of House Music [FREE for Limited Time] by Kratex</a></iframe>';
                 
                 // Fetch individual track artwork if not in cache
                 if (!isset($trackArts[$trackId])) {
@@ -117,7 +124,7 @@
                 echo '      </div>';
                 echo '    </div>';
 
-                echo '    <img src="'.htmlspecialchars($art).'" alt="Artwork" draggable="false" style="position: relative; z-index: 2; width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">';
+                echo '    <img src="'.htmlspecialchars($art).'" class="artwork-img" alt="Artwork" loading="lazy" draggable="false" style="position: relative; z-index: 2; width: 100%; height: 100%; object-fit: cover; border-radius: 4px; opacity: 0; transition: opacity 0.5s ease-in-out;">';
                 echo '  </div>';
                 
                 // Title for list view
@@ -180,7 +187,18 @@
     </div>
 
     <div id="widget-container" style="display: none;">
-        <!-- Mini widget injected here -->
+        <div class="player-controls">
+            <button id="player-prev" class="icon-btn" title="Previous Track">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+            </button>
+            <button id="player-random" class="icon-btn" title="Random Track">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+            </button>
+            <button id="player-next" class="icon-btn" title="Next Track">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+            </button>
+        </div>
+        <div id="widget-iframe-container"></div>
     </div>
 
     <script src="script.js"></script>

@@ -1,3 +1,12 @@
+window.addEventListener('load', () => {
+    const loader = document.getElementById('page-loader');
+    if (loader) {
+        setTimeout(() => {
+            loader.classList.add('hidden');
+        }, 100);
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     const audioBtn = document.querySelector('.audio-btn');
     let isMuted = false;
@@ -30,14 +39,61 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Inject mini widget at the bottom
         const container = document.getElementById('widget-container');
-        if (container && slot.dataset.widget) {
+        const iframeContainer = document.getElementById('widget-iframe-container');
+        if (container && iframeContainer && slot.dataset.widget) {
             let widgetHTML = slot.dataset.widget;
             if(widgetHTML.indexOf('autoplay=true') === -1) {
                 widgetHTML = widgetHTML.replace('transparent=true/', 'transparent=true/autoplay=true/');
             }
-            container.innerHTML = widgetHTML;
-            container.style.display = 'block';
+            iframeContainer.innerHTML = widgetHTML;
+            container.style.display = 'flex';
         }
+        
+        // Delay scroll to allow CSS expansion transition to complete smoothly
+        setTimeout(() => {
+            slot.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'center' });
+        }, 400);
+    }
+
+    function getPlayingIndex() {
+        const slots = document.querySelectorAll('.vinyl-slot');
+        return Array.from(slots).findIndex(s => s.classList.contains('playing'));
+    }
+
+    const playerPrev = document.getElementById('player-prev');
+    const playerNext = document.getElementById('player-next');
+    const playerRandom = document.getElementById('player-random');
+
+    if (playerPrev) {
+        playerPrev.addEventListener('click', () => {
+            const slots = document.querySelectorAll('.vinyl-slot');
+            const currentIndex = getPlayingIndex();
+            if (currentIndex !== -1 && slots.length > 0) {
+                const prevIndex = (currentIndex - 1 + slots.length) % slots.length;
+                playTrack(slots[prevIndex]);
+            }
+        });
+    }
+
+    if (playerNext) {
+        playerNext.addEventListener('click', () => {
+            const slots = document.querySelectorAll('.vinyl-slot');
+            const currentIndex = getPlayingIndex();
+            if (currentIndex !== -1 && slots.length > 0) {
+                const nextIndex = (currentIndex + 1) % slots.length;
+                playTrack(slots[nextIndex]);
+            }
+        });
+    }
+
+    if (playerRandom) {
+        playerRandom.addEventListener('click', () => {
+            const slots = document.querySelectorAll('.vinyl-slot');
+            if (slots.length > 0) {
+                const randomIndex = Math.floor(Math.random() * slots.length);
+                playTrack(slots[randomIndex]);
+            }
+        });
     }
 
     function setupVinylSlot(slot) {
@@ -185,9 +241,24 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     stack.addEventListener('wheel', (e) => {
-        if (!stack.classList.contains('cd-orbit-view')) return;
-        e.preventDefault();
-        handleOrbitScroll(e.deltaY + e.deltaX);
+        if (stack.classList.contains('cd-orbit-view')) {
+            e.preventDefault();
+            handleOrbitScroll(e.deltaY + e.deltaX);
+            return;
+        }
+
+        const isHorizontal = !stack.classList.contains('grid-view') && 
+                             !stack.classList.contains('list-view') && 
+                             !stack.classList.contains('scattered-view') && 
+                             !stack.classList.contains('ipod-view');
+                             
+        if (isHorizontal) {
+            // Convert vertical scroll to horizontal scroll
+            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                e.preventDefault();
+                stack.scrollLeft += e.deltaY;
+            }
+        }
     }, { passive: false });
 
     stack.addEventListener('touchstart', (e) => {
@@ -202,6 +273,43 @@ document.addEventListener('DOMContentLoaded', () => {
         lastTouchX = currentX;
         handleOrbitScroll(-deltaX * 5); // Multiplier for touch sensitivity
     }, { passive: true });
+
+    // --- Dynamic Z-Index for Horizontal View Perspective ---
+    function updateHorizontalZIndex() {
+        const isHorizontal = !stack.classList.contains('grid-view') && 
+                             !stack.classList.contains('list-view') && 
+                             !stack.classList.contains('scattered-view') && 
+                             !stack.classList.contains('cd-orbit-view') && 
+                             !stack.classList.contains('ipod-view');
+                             
+        if (!isHorizontal) {
+            slots.forEach(slot => slot.style.zIndex = '');
+            return;
+        }
+        
+        const stackCenter = stack.getBoundingClientRect().left + stack.offsetWidth / 2;
+        
+        slots.forEach(slot => {
+            if (slot.classList.contains('playing') || slot.classList.contains('active')) {
+                slot.style.zIndex = 100;
+                return;
+            }
+            const slotRect = slot.getBoundingClientRect();
+            const slotCenter = slotRect.left + slotRect.width / 2;
+            const dist = Math.abs(stackCenter - slotCenter);
+            
+            // Closest to center gets highest value to overlap edges properly
+            const zIndex = Math.floor(50 - (dist / 20));
+            slot.style.zIndex = Math.max(0, zIndex);
+        });
+    }
+
+    stack.addEventListener('scroll', () => {
+        requestAnimationFrame(updateHorizontalZIndex);
+    });
+    window.addEventListener('resize', updateHorizontalZIndex);
+    // Initial call
+    setTimeout(updateHorizontalZIndex, 100);
 
     // --- iPod View Logic ---
     const ipodTrackList = document.querySelector('.ipod-track-list');
@@ -339,6 +447,39 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (ipodPlayer) ipodPlayer.style.display = 'none';
                 }
             }
+            
+            updateHorizontalZIndex();
         });
     }
+
+    // --- Dark Mode Toggle ---
+    const darkModeBtn = document.getElementById('dark-mode-toggle');
+    if (darkModeBtn) {
+        // Check for saved user preference, if any, on load of the website
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+            darkModeBtn.innerHTML = '☀️ Light Mode';
+        }
+
+        darkModeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('darkMode', 'true');
+                darkModeBtn.innerHTML = '☀️ Light Mode';
+            } else {
+                localStorage.setItem('darkMode', 'false');
+                darkModeBtn.innerHTML = '🌙 Dark Mode';
+            }
+        });
+    }
+
+    // --- Smooth Image Loading ---
+    document.querySelectorAll('.artwork-img').forEach(img => {
+        if (img.complete) {
+            img.style.opacity = '1';
+        } else {
+            img.addEventListener('load', () => img.style.opacity = '1');
+        }
+    });
 });
